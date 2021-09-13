@@ -1,5 +1,5 @@
 {
-  "name": "sanity-plugin-onlyhtml-connector",
+  "name": "@onlyhtml/sanity-plugin-onlyhtml-connector",
   "version": "1.0.0",
   "description": "",
   "main": "lib/YourPlugin.js",
