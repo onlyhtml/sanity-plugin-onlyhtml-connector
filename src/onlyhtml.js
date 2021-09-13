@@ -3,6 +3,9 @@ import createSchema from 'part:@sanity/base/schema-creator'
 import schemaTypes from 'all:part:@sanity/base/schema-type'
 import sanityClient from 'part:@sanity/base/client'
 
+import getBlockContentSchema from './parts/schemas/blockContent'
+import link from './parts/schemas/link'
+
 const onlyhtmlToSanityTypes = {
     'text': 'string',
     'image': 'image',
@@ -33,6 +36,10 @@ export default class OnlyHtml {
         let types = schemaTypes;
         const schemas = Object.values(documents);
         types = types.concat(schemas);
+        types = types.concat([
+            getBlockContentSchema(schemaTypes.map(t => t.name)),
+            link,
+        ]);
 
         return createSchema({
             name: 'default',
@@ -96,7 +103,7 @@ export default class OnlyHtml {
 
         }
 
-        if (block.type === 'collection' ) {
+        if (block.type === 'collection') {
             // Works nice with https://www.sanity.io/plugins/order-documents
             sanityFields.push({
                 name: 'order',

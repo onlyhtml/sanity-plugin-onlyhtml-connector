@@ -15,14 +15,6 @@
         {
             "implements": "part:@sanity/desk-tool/structure",
             "path": "parts/desk.js"
-        },
-        {
-            "implements": "part:@sanity/base/schema-type",
-            "path": "parts/schemas/link.js"
-        },
-        {
-            "implements": "part:@sanity/base/schema-type",
-            "path": "parts/schemas/blockContent.js"
         }
     ]
 }
