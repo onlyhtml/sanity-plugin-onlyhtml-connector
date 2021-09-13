@@ -2,7 +2,7 @@
   "name": "@onlyhtml/sanity-plugin-onlyhtml-connector",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/YourPlugin.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "sanipack build",
     "watch": "sanipack build --watch",
@@ -28,6 +28,7 @@
     "sanipack": "2.0.1"
   },
   "peerDependencies": {
+    "@sanity/desk-tool": "^2.18.0",
     "react": "^17.0.0"
   },
   "prettier": {
