@@ -1,9 +1,9 @@
-import MyTool from './MyTool'
-import MyToolIcon from './MyToolIcon'
+import Dashboard from './OnlyHtmlDashboard'
+import Icon from './OnlyHtmlIcon'
 
 export default {
-  title: 'MyTool',
-  name: 'mytool',
-  icon: MyToolIcon,
-  component: MyTool
+  title: 'OnlyHtml',
+  name: 'onlyhtml',
+  icon: Icon,
+  component: Dashboard
 }

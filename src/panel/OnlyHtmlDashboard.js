@@ -1,6 +1,6 @@
 import React from 'react'
 
-class MyTool extends React.Component {
+class OnlyHtmlDashboard extends React.Component {
   render() {
     return (
       <div>
@@ -11,4 +11,4 @@ class MyTool extends React.Component {
   }
 }
 
-export default MyTool
+export default OnlyHtmlDashboard
