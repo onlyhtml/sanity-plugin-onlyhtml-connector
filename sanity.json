@@ -1,7 +1,20 @@
 {
-  "paths": {
-    "source": "./src",
-    "compiled": "./lib"
-  },
-  "parts": []
+    "paths": {
+        "source": "./src",
+        "compiled": "./lib"
+    },
+    "parts": [
+        {
+            "implements": "part:@sanity/base/tool",
+            "path": "index.js"
+        },
+        {
+            "implements": "part:@sanity/base/schema",
+            "path": "schemas.js"
+        },
+        {
+            "implements": "part:@sanity/desk-tool/structure",
+            "path": "desk.js"
+        }
+    ]
 }
