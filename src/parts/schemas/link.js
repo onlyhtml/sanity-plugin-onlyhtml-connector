@@ -1,7 +1,7 @@
 export default {
     title: 'Link',
     name: 'link',
-    type: 'document',
+    type: 'object',
     fields: [
         {
             name: 'text',

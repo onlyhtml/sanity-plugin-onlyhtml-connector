@@ -6,15 +6,23 @@
     "parts": [
         {
             "implements": "part:@sanity/base/tool",
-            "path": "index.js"
+            "path": "panel/index.js"
         },
         {
             "implements": "part:@sanity/base/schema",
-            "path": "schemas.js"
+            "path": "parts/schemas.js"
         },
         {
             "implements": "part:@sanity/desk-tool/structure",
-            "path": "desk.js"
+            "path": "parts/desk.js"
+        },
+        {
+            "implements": "part:@sanity/base/schema-type",
+            "path": "parts/schemas/link.js"
+        },
+        {
+            "implements": "part:@sanity/base/schema-type",
+            "path": "parts/schemas/blockContent.js"
         }
     ]
 }

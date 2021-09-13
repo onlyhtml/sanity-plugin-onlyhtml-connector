@@ -1,11 +1,6 @@
-import blockContent from './schemas/blockContent'
-import link from './schemas/link'
-
 import S from '@sanity/desk-tool/structure-builder'
-
 import createSchema from 'part:@sanity/base/schema-creator'
 import schemaTypes from 'all:part:@sanity/base/schema-type'
-
 import sanityClient from 'part:@sanity/base/client'
 
 const onlyhtmlToSanityTypes = {
@@ -33,15 +28,11 @@ export default class OnlyHtml {
         }
 
         console.log('done converting blocks to schema');
-        const schemas = Object.values(documents);
 
+        // use default schema types and add auto-generated site specific ones on top
         let types = schemaTypes;
+        const schemas = Object.values(documents);
         types = types.concat(schemas);
-        types = types.concat([
-            blockContent,
-            link,
-        ]);
-
 
         return createSchema({
             name: 'default',
