@@ -77,8 +77,8 @@ export default {
                 }
             ]
         },
-        {
-            type: 'code',
-        }
+        // {
+        //     type: 'code',
+        // }
     ],
 }
