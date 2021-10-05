@@ -13,6 +13,7 @@ const onlyhtmlToSanityTypes = {
     'link': 'link',
     'icon': 'iconPicker', // TODO add support in interneto-core
     'choice': 'boolean',
+    'reference': 'reference',
 };
 
 export default class OnlyHtml {
@@ -81,11 +82,26 @@ export default class OnlyHtml {
         const sanityFields = [];
 
         for (const field of block.fields) {
-            sanityFields.push({
+            const sanityField = {
                 name: field.id,
                 title: idToTitle(field.id),
                 type: onlyhtmlToSanityTypes[field.type] || field.type,
-            });
+            };
+
+            if (field.type === 'reference' && field.options.multiple) {
+                sanityField.type = 'array';
+                sanityField.of = [{
+                    type: 'reference',
+                    to: [{ type: field.options.target }],
+                }];
+            } 
+            else if (field.type === 'reference') {
+                sanityField.to = [{
+                    type: field.options.target 
+                }];
+            }
+
+            sanityFields.push(sanityField);
         }
 
         if (block.type === 'collection' && block.hasCollectionItems === true) {
