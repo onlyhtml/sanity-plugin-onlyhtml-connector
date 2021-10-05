@@ -74,7 +74,7 @@ export default class OnlyHtml {
                 ...singletonItems,
                 S.divider(),
                 ...collectionItems
-            ])
+            ]);
     }
 
     _convertBlockToSanityDocument(block) {
