@@ -29,6 +29,8 @@ export default function getBlockContentSchema(supportedSchemaTypes) {
                         {title: 'Strong', value: 'strong'},
                         {title: 'Emphasis', value: 'em'},
                         {title: 'Code', value: 'code'},
+                        {title: "Underline", value: "underline" },
+                        {title: "Strike", value: "strike-through"}
                     ],
                     // Annotations can be any object structure – e.g. a link or a footnote.
                     annotations: [
@@ -75,8 +77,21 @@ export default function getBlockContentSchema(supportedSchemaTypes) {
     if (supportedSchemaTypes.includes("code")) {
         console.log('type code is supported');
 
+        // code snippets
         blockContent.of.push({
             type: 'code',
+        });
+
+
+        // raw code in portable text
+        blockContent.of.push({
+            type: 'code',
+            name: 'raw',
+            title: 'Raw Content',
+            description: 'Enter raw HTML content to be added to the post',
+            options: {
+                language: 'html',
+            }
         });
     }
 
