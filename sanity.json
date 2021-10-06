@@ -5,10 +5,6 @@
     },
     "parts": [
         {
-            "implements": "part:@sanity/base/tool",
-            "path": "panel/index.js"
-        },
-        {
             "implements": "part:@sanity/base/schema",
             "path": "parts/schemas.js"
         },
