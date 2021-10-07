@@ -95,5 +95,13 @@ export default function getBlockContentSchema(supportedSchemaTypes) {
         });
     }
 
+    if (supportedSchemaTypes.includes("table")) {
+        blockContent.of.push({
+            type: 'table',
+            title: 'Table',
+            name: 'table',
+        });
+    }
+
     return blockContent;
 };
