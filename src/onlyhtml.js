@@ -3,6 +3,9 @@ import createSchema from 'part:@sanity/base/schema-creator'
 import schemaTypes from 'all:part:@sanity/base/schema-type'
 import sanityClient from 'part:@sanity/base/client'
 
+import IconSingle from './panel/IconSingle'
+import IconCollection from './panel/IconCollection'
+
 import getBlockContentSchema from './parts/schemas/blockContent'
 import link from './parts/schemas/link'
 
@@ -50,9 +53,13 @@ export default class OnlyHtml {
 
     createDeskStructure() {
         const singletonDocuments = this.blocks.filter(block => isSingleton(block.type)).map(block => block.id);
-        const collectionItems = S.documentTypeListItems().filter(listItem => !singletonDocuments.includes(listItem.getId()));
+
+        const collectionItems = S.documentTypeListItems()
+            .filter(listItem => !singletonDocuments.includes(listItem.getId()))
+            .map(listItem => listItem.icon(IconCollection));
+
         const singletonItems = singletonDocuments.map(id => {
-            return S.listItem().title(idToTitle(id)).child(
+            return S.listItem().title(idToTitle(id)).icon(IconSingle).child(
                 S.editor()
                     .schemaType(id)
                     .documentId(id)
@@ -68,6 +75,11 @@ export default class OnlyHtml {
 
             await sanityClient.createIfNotExists(doc);
         });
+
+        // collectionItems.forEach(item => {
+        //     item.icon(OnlyHtmlIcon)
+        //     console.log('set icon to', OnlyHtmlIcon)
+        // });
 
         return S.list()
             .title('Sections')
@@ -149,7 +161,7 @@ function isSingleton(blockType) {
 }
 
 function idToTitle(id) {
-    id = id.replace('_', ' ');
+    id = id.replaceAll('_', ' ');
     id = id.split(' ').map(val => val.charAt(0).toUpperCase() + val.substr(1)).join(' ');
     return id;
 }
