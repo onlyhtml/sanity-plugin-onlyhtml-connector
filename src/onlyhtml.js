@@ -22,6 +22,7 @@ const onlyhtmlToSanityTypes = {
 export default class OnlyHtml {
     constructor(blocks) {
         this.blocks = blocks.filter(block => block.fields.length > 0);
+        this.blockIds = blocks.map(block => block.id);
     }
 
     createSchema() {
@@ -32,6 +33,13 @@ export default class OnlyHtml {
             }
 
             documents[block.id] = this._convertBlockToSanityDocument(block);
+
+            // Notice this is not recursiver rather one level deep
+            if (block.directChildren && block.directChildren.length > 0) {
+                for(const childBlock of block.directChildren) {
+                    documents[childBlock.id] = this._convertBlockToSanityDocument(childBlock);
+                }
+            }
         }
 
         console.log('done converting blocks to schema');
@@ -56,6 +64,7 @@ export default class OnlyHtml {
 
         const collectionItems = S.documentTypeListItems()
             .filter(listItem => !singletonDocuments.includes(listItem.getId()))
+            .filter(listItem => this.blockIds.includes(listItem.getId())) // remove direct children block types from main navigation
             .map(listItem => listItem.icon(IconCollection));
 
         const singletonItems = singletonDocuments.map(id => {
@@ -76,11 +85,6 @@ export default class OnlyHtml {
             await sanityClient.createIfNotExists(doc);
         });
 
-        // collectionItems.forEach(item => {
-        //     item.icon(OnlyHtmlIcon)
-        //     console.log('set icon to', OnlyHtmlIcon)
-        // });
-
         return S.list()
             .title('Sections')
             .items([
@@ -91,7 +95,7 @@ export default class OnlyHtml {
     }
 
     _convertBlockToSanityDocument(block) {
-        const sanityFields = [];
+        let sanityFields = [];
 
         for (const field of block.fields) {
             const sanityField = {
@@ -139,6 +143,23 @@ export default class OnlyHtml {
                 type: 'number',
                 hidden: true,
             });
+        }
+
+        if (block.type === 'page' || block.type === 'section') {
+            if (block.directChildren) {
+                const directChildrenFields = block.directChildren.map(c => {
+                    // const docType = this._convertBlockToSanityDocument(c)
+                    const sanityField = {
+                        name: c.id,
+                        title: idToTitle(c.id),
+                        type: 'array',
+                        of: [{type: c.id}], // we have created a schema for this specific type and here we use it
+                    };
+                    return sanityField;
+                });
+
+                sanityFields = sanityFields.concat(directChildrenFields);
+            }
         }
 
         const sanityDocument = {
