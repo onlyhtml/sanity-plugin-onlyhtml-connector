@@ -17,6 +17,7 @@ const onlyhtmlToSanityTypes = {
     'icon': 'iconPicker', // TODO add support in interneto-core
     'choice': 'boolean',
     'reference': 'reference',
+    'video': 'mux.video',
 };
 
 export default class OnlyHtml {
@@ -34,7 +35,7 @@ export default class OnlyHtml {
 
             documents[block.id] = this._convertBlockToSanityDocument(block);
 
-            // Notice this is not recursiver rather one level deep
+            // Notice this is not recursive rather one level deep
             if (block.directChildren && block.directChildren.length > 0) {
                 for(const childBlock of block.directChildren) {
                     documents[childBlock.id] = this._convertBlockToSanityDocument(childBlock);
@@ -60,11 +61,15 @@ export default class OnlyHtml {
     }
 
     createDeskStructure() {
-        const singletonDocuments = this.blocks.filter(block => isSingleton(block.type)).map(block => block.id);
+        const directChildrenIDs = this.blocks.flatMap(block => block.directChildren).map(c => c.id);
+
+        const singletonDocuments = this.blocks.filter(block => isSingleton(block.type))
+            .filter(block => !directChildrenIDs.includes(block.id))
+            .map(block => block.id);
 
         const collectionItems = S.documentTypeListItems()
             .filter(listItem => !singletonDocuments.includes(listItem.getId()))
-            .filter(listItem => this.blockIds.includes(listItem.getId())) // remove direct children block types from main navigation
+            .filter(listItem => !directChildrenIDs.includes(listItem.getId()))
             .map(listItem => listItem.icon(IconCollection));
 
         const singletonItems = singletonDocuments.map(id => {
@@ -86,7 +91,7 @@ export default class OnlyHtml {
         });
 
         return S.list()
-            .title('Sections')
+            .title('Content')
             .items([
                 ...singletonItems,
                 S.divider(),
@@ -148,14 +153,22 @@ export default class OnlyHtml {
         if (block.type === 'page' || block.type === 'section') {
             if (block.directChildren) {
                 const directChildrenFields = block.directChildren.map(c => {
-                    // const docType = this._convertBlockToSanityDocument(c)
-                    const sanityField = {
+                    console.log('direct child', c);
+                    if (c.type === 'collection') {
+                        return {
+                            name: c.id,
+                            title: idToTitle(c.id),
+                            type: 'array',
+                            of: [{type: c.id}], // we have created a schema for this specific type and here we use it
+                        };
+                    }
+
+                    // embed the schema of the section child as a field of the parent
+                    return {
                         name: c.id,
                         title: idToTitle(c.id),
-                        type: 'array',
-                        of: [{type: c.id}], // we have created a schema for this specific type and here we use it
+                        type: c.id,
                     };
-                    return sanityField;
                 });
 
                 sanityFields = sanityFields.concat(directChildrenFields);
