@@ -34,13 +34,7 @@ export default class OnlyHtml {
             }
 
             documents[block.id] = this._convertBlockToSanityDocument(block);
-
-            // Notice this is not recursive rather one level deep
-            if (block.directChildren && block.directChildren.length > 0) {
-                for(const childBlock of block.directChildren) {
-                    documents[childBlock.id] = this._convertBlockToSanityDocument(childBlock);
-                }
-            }
+            this._convertDirectChildrenRecursive(block, documents);
         }
 
         console.log('done converting blocks to schema');
@@ -61,7 +55,11 @@ export default class OnlyHtml {
     }
 
     createDeskStructure() {
-        const directChildrenIDs = this.blocks.flatMap(block => block.directChildren).map(c => c.id);
+        const weakChildrnIDs = this.blocks.flatMap(block => block.weakChildren).map(c => c.id);
+        console.log('weak', weakChildrnIDs);
+        const directChildrenIDs = this.blocks.flatMap(block => block.directChildren)
+            .filter(c => !weakChildrnIDs.includes(c.id))
+            .map(c => c.id);
 
         const singletonDocuments = this.blocks.filter(block => isSingleton(block.type))
             .filter(block => !directChildrenIDs.includes(block.id))
@@ -99,6 +97,17 @@ export default class OnlyHtml {
             ]);
     }
 
+    _convertDirectChildrenRecursive(block, documents) {
+        console.log('convert direct children recursive', block);
+        // Notice this is not recursive rather one level deep
+        if (block.directChildren && block.directChildren.length > 0) {
+            for (const childBlock of block.directChildren) {
+                documents[childBlock.id] = this._convertBlockToSanityDocument(childBlock);
+                this._convertDirectChildrenRecursive(childBlock, documents);
+            }
+        }
+    }
+
     _convertBlockToSanityDocument(block) {
         let sanityFields = [];
 
@@ -113,12 +122,12 @@ export default class OnlyHtml {
                 sanityField.type = 'array';
                 sanityField.of = [{
                     type: 'reference',
-                    to: [{ type: field.options.target }],
+                    to: [{type: field.options.target}],
                 }];
-            } 
+            }
             else if (field.type === 'reference') {
                 sanityField.to = [{
-                    type: field.options.target 
+                    type: field.options.target
                 }];
             }
 
