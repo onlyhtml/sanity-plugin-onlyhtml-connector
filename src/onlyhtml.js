@@ -18,6 +18,7 @@ const onlyhtmlToSanityTypes = {
     'choice': 'boolean',
     'reference': 'reference',
     'video': 'mux.video',
+    'code': 'code',
 };
 
 export default class OnlyHtml {
@@ -129,6 +130,12 @@ export default class OnlyHtml {
                 sanityField.to = [{
                     type: field.options.target
                 }];
+            }
+
+            if (field.type === 'code' && field.options && field.options.language) {
+                sanityField.options = {
+                    language: field.options.language,
+                };
             }
 
             sanityFields.push(sanityField);
