@@ -119,6 +119,10 @@ export default class OnlyHtml {
                 type: onlyhtmlToSanityTypes[field.type] || field.type,
             };
 
+            if (field.options.description) {
+                sanityField.description = field.options.description;
+            }
+
             if (field.type === 'reference' && field.options.multiple) {
                 sanityField.type = 'array';
                 sanityField.of = [{
