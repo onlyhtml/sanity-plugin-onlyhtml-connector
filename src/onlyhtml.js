@@ -57,7 +57,6 @@ export default class OnlyHtml {
 
     createDeskStructure() {
         const weakChildrnIDs = this.blocks.flatMap(block => block.weakChildren).map(c => c.id);
-        console.log('weak', weakChildrnIDs);
         const directChildrenIDs = this.blocks.flatMap(block => block.directChildren)
             .filter(c => !weakChildrnIDs.includes(c.id))
             .map(c => c.id);
@@ -66,10 +65,17 @@ export default class OnlyHtml {
             .filter(block => !directChildrenIDs.includes(block.id))
             .map(block => block.id);
 
-        const collectionItems = S.documentTypeListItems()
-            .filter(listItem => !singletonDocuments.includes(listItem.getId()))
-            .filter(listItem => !directChildrenIDs.includes(listItem.getId()))
-            .map(listItem => listItem.icon(IconCollection));
+        const collectionDocuments = this.blocks.filter(block => isCollection(block.type))
+            .filter(block => !directChildrenIDs.includes(block.id))
+            .map(block => block.id);
+
+        const collectionItems = collectionDocuments.map(id => {
+            const title = idToTitle(id);
+            return S.listItem().title(title).icon(IconCollection)
+                .child(S.documentTypeList(id)
+                    .title(title)
+                    .filter(`_type == "${id}"`))
+        });
 
         const singletonItems = singletonDocuments.map(id => {
             return S.listItem().title(idToTitle(id)).icon(IconSingle).child(
@@ -211,6 +217,10 @@ export default class OnlyHtml {
 
         return sanityDocument;
     }
+}
+
+function isCollection(blockType) {
+    return blockType === 'collection';
 }
 
 function isSingleton(blockType) {
