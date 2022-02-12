@@ -9,6 +9,9 @@ import IconCollection from './panel/IconCollection'
 import getBlockContentSchema from './parts/schemas/blockContent'
 import link from './parts/schemas/link'
 
+
+import {getEditorNode} from './parts/document_node'
+
 const onlyhtmlToSanityTypes = {
     'text': 'string',
     'image': 'image',
@@ -56,6 +59,8 @@ export default class OnlyHtml {
     }
 
     createDeskStructure() {
+        // const defaultEditor = getDefaultDocumentNode(); 
+
         const weakChildrnIDs = this.blocks.flatMap(block => block.weakChildren).map(c => c.id);
         const directChildrenIDs = this.blocks.flatMap(block => block.directChildren)
             .filter(c => !weakChildrnIDs.includes(c.id))
@@ -71,18 +76,22 @@ export default class OnlyHtml {
 
         const collectionItems = collectionDocuments.map(id => {
             const title = idToTitle(id);
-            return S.listItem().title(title).icon(IconCollection)
+            return S.listItem()
+                .title(title)
+                .icon(IconCollection)
                 .child(S.documentTypeList(id)
                     .title(title)
-                    .filter(`_type == "${id}"`))
+                    .filter(`_type == "${id}"`)
+                    .defaultOrdering([{field: 'order', direction: 'asc'}])
+                    .child(getEditorNode(id))
+                );
         });
 
         const singletonItems = singletonDocuments.map(id => {
-            return S.listItem().title(idToTitle(id)).icon(IconSingle).child(
-                S.editor()
-                    .schemaType(id)
-                    .documentId(id)
-            );
+            return S.listItem()
+                .title(idToTitle(id))
+                .icon(IconSingle)
+                .child(getEditorNode(id).documentId(id))
         });
 
         singletonDocuments.map(async documentId => {
