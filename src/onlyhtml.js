@@ -123,6 +123,8 @@ export default class OnlyHtml {
                 name: field.id,
                 title: idToTitle(field.id),
                 type: onlyhtmlToSanityTypes[field.type] || field.type,
+                description: field.options.label || undefined,
+                initialValue: field.default || undefined,
             };
 
             if (field.options.description) {
@@ -149,6 +151,10 @@ export default class OnlyHtml {
                 sanityField.options = {
                     language: field.options.language,
                 };
+            }
+
+            if (field.type === 'choice') {
+                sanityField.initialValue = false;
             }
 
             sanityFields.push(sanityField);
