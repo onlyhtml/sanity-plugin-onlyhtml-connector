@@ -56,11 +56,7 @@ export default class OnlyHtml {
     }
 
     createDeskStructure() {
-        const weakChildrnIDs = this.blocks.flatMap(block => block.weakChildren).map(c => c.id);
-        const directChildrenIDs = this.blocks.flatMap(block => block.directChildren)
-            .filter(c => !weakChildrnIDs.includes(c.id))
-            .map(c => c.id);
-
+        const directChildrenIDs = getDirectChildrenIDs(this.blocks);
         const singletonDocuments = this.blocks.filter(block => isSingleton(block.type))
             .filter(block => !directChildrenIDs.includes(block.id))
             .map(block => block.id);
@@ -185,7 +181,7 @@ export default class OnlyHtml {
             });
         }
 
-        if (block.type === 'page' || block.type === 'section') {
+        if (block.type === 'page' || block.type === 'section' || block.type === 'collection') {
             if (block.directChildren) {
                 const directChildrenFields = block.directChildren.map(c => {
                     console.log('direct child', c);
@@ -237,4 +233,22 @@ function idToTitle(id) {
     id = id.replaceAll('_', ' ');
     id = id.split(' ').map(val => val.charAt(0).toUpperCase() + val.substr(1)).join(' ');
     return id;
+}
+
+function getAllChildren(blocks, propertyName) {
+    if (blocks.length == 0) { return [] }
+
+    const children = blocks.flatMap(block => block[propertyName]);
+    console.log('children', children);
+    const recursiveChildren = getAllChildren(children, propertyName);
+    const ids = children.map(block => block.id).concat(recursiveChildren);
+    return ids
+}
+
+function getDirectChildrenIDs(blocks) {
+    console.log('blocks', blocks);
+    const weakIDs = getAllChildren(blocks, 'weakChildren');
+    const directIDs = getAllChildren(blocks, 'directChildren'); // .filter(childID => !weakIDs.includes(childID))
+    console.log('weak', weakIDs, 'direct', directIDs);
+    return directIDs;
 }
