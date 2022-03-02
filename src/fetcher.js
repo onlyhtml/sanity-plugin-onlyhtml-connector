@@ -53,6 +53,16 @@ export default class SanityFetcher {
         return records;
     }
 
+    async enrichSanityDoc(records, sanityDoc) {
+        const docClone = Object.assign({}, sanityDoc);
+        const enrichedDoc = await this._prepareDoc(docClone);
+        records[sanityDoc._type] = enrichedDoc;
+        const directChildren = await this._prepareDirectChildren(sanityDoc);
+        console.log('direct children', directChildren);
+        Object.assign(records[sanityDoc._type], directChildren);
+        return records;
+    }
+
     async _prepareDirectChildren(doc) {
         const block = this.blocks[doc._type];
         if (block === undefined) {return {};}
@@ -97,7 +107,8 @@ export default class SanityFetcher {
     }
 
 
-    async _prepareDocWithBlock(doc, block) {
+    async _prepareDocWithBlock(originalDoc, block) {
+        const doc = Object.assign({}, originalDoc)
         if (block === undefined) {
             throw new Error(`no block with type ${doc._type}`);
         }

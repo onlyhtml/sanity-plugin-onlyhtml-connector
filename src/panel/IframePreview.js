@@ -62,13 +62,13 @@ export const WebPreview = ({document: doc}) => {
         }
 
         (async () => {
-            if (draft) {
-                const clonedDraft = Object.assign({}, draft || {})
-                const enrichedDoc = await fetcher._prepareDoc(clonedDraft)
-                records[_type] = enrichedDoc;
+            if (!draft) {
+                renderRecords(iframeRef.current, records);
+                return;
             }
-            // const enrichedDoc = draft;
-            renderRecords(iframeRef.current, records);
+            const enrichedRecords = await fetcher.enrichSanityDoc(records, draft);
+            console.log('got enriched records', enrichedRecords);
+            renderRecords(iframeRef.current, enrichedRecords);
         })();
     }, [records, draft?._rev]);
 
