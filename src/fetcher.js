@@ -26,31 +26,6 @@ export default class SanityFetcher {
         console.log('[fetcher] new instance', this.query, this.params, this.blocks.length);
     }
 
-    subscribeToChanges(callback) {
-        if (this._subscription !== undefined) {
-            console.warn('subscribed more than once');
-            return;
-        }
-
-        this._subscription = this.sanity.listen(this.query, this.params).subscribe(async (update) => {
-            if (update.result && callback) {
-                let doc = update.result;
-                doc = await this._prepareDoc(doc);
-                callback(ChangeType.UPDATE_OR_CREATE, doc);
-                return;
-            }
-
-            if (update.mutations && callback) {
-                for (const mutation of update.mutations) {
-                    if (mutation.delete) {
-                        callback(ChangeType.DELETE, {id: mutation.delete.id});
-                    }
-                }
-                return;
-            }
-        });
-    }
-
     /*
      * @returns {Promise<object>} a map from blockName -> document | list of documents 
      */
@@ -105,7 +80,6 @@ export default class SanityFetcher {
                     return this._prepareDocWithBlock(doc, childBlock);
                 }));
 
-                // this._prepareDirectChildrenWithBlock(childDocs, childBlock);
                 continue;
             }
 
