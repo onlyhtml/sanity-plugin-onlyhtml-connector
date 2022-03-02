@@ -62,11 +62,8 @@ export const WebPreview = ({document: doc}) => {
         }
 
         (async () => {
-            if (!draft) {
-                renderRecords(iframeRef.current, records);
-                return;
-            }
-            const enrichedRecords = await fetcher.enrichSanityDoc(records, draft);
+            const currentDoc = draft || displayed;
+            const enrichedRecords = await fetcher.enrichSanityDoc(records, currentDoc);
             console.log('got enriched records', enrichedRecords);
             renderRecords(iframeRef.current, enrichedRecords);
         })();
