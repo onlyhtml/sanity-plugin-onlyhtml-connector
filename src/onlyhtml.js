@@ -9,9 +9,6 @@ import IconCollection from './panel/IconCollection'
 import getBlockContentSchema from './parts/schemas/blockContent'
 import link from './parts/schemas/link'
 
-
-import {getEditorNode} from './parts/document_node'
-
 const onlyhtmlToSanityTypes = {
     'text': 'string',
     'image': 'image',
@@ -77,7 +74,6 @@ export default class OnlyHtml {
                     .title(title)
                     .filter(`_type == "${id}"`)
                     .defaultOrdering([{field: 'order', direction: 'asc'}])
-                    .child(getEditorNode(id))
                 );
         });
 
@@ -85,7 +81,6 @@ export default class OnlyHtml {
             return S.listItem()
                 .title(idToTitle(id))
                 .icon(IconSingle)
-                .child(getEditorNode(id).documentId(id))
         });
 
         singletonDocuments.map(async documentId => {

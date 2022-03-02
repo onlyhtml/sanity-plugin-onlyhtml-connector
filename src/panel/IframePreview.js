@@ -8,6 +8,14 @@ export const WebPreview = ({document: doc}) => {
     const {displayed} = doc;
     const {slug, _type} = displayed;
 
+    const fetcher = new SanityFetcher(
+        sanityClient.withConfig({
+            apiVersion: '2021-02-02',
+            useCdn: false,
+            withCredentials: true,
+        }),
+        pluginConfig.blocks);
+
     let url = 'http://localhost:8080';
     // TODO change this url behaivour
     // https://docs.netlify.com/routing/redirects/
@@ -19,12 +27,10 @@ export const WebPreview = ({document: doc}) => {
     const [records, setRecords] = useState([]);
 
     useEffect(() => {
-        const fetcher = new SanityFetcher(sanityClient, pluginConfig.blocks);
-        (async () => {
-            const r = await fetcher.fetchRecords();
-            console.log('fetcher got records', r);
-            setRecords(r);
-        })();
+        fetcher.fetchRecords().then(r => {
+            console.log('fetcher got records!');
+            setRecords(r)
+        });
     }, [url]);
 
     const onIframeLoad = () => {
