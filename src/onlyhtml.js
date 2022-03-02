@@ -81,6 +81,7 @@ export default class OnlyHtml {
             return S.listItem()
                 .title(idToTitle(id))
                 .icon(IconSingle)
+                .child(S.editor().schemaType(id).documentId(id))
         });
 
         singletonDocuments.map(async documentId => {
