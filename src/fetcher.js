@@ -2,8 +2,7 @@ import parse5 from 'parse5'
 import blocksToHtml from '@sanity/block-content-to-html'
 import imageUrlBuilder from '@sanity/image-url'
 
-import {Block, BlockType} from "../template/block.js";
-
+const BlockTypeCollection = 'collection';
 export class ChangeType {
     static UPDATE_OR_CREATE = 'update_or_create';
     static DELETE = 'delete';
@@ -17,11 +16,14 @@ export default class SanityFetcher {
      */
     constructor(sanityClient, blocks) {
         this.sanity = sanityClient;
-        this.blocks = blocks;
+        this.sanityConfig = sanityClient.config();
+        this.blocks = getBlocksMap(blocks);
         this.query = '*[_type in $types] { ..., "order": coalesce(order, 0) } | order(order asc)';
         this.params = {
-            types: Object.keys(blocks),
-        };
+            types: Object.keys(this.blocks)
+        }
+
+        console.log('[fetcher] new instance', this.query, this.params, this.blocks.length);
     }
 
     subscribeToChanges(callback) {
@@ -53,21 +55,24 @@ export default class SanityFetcher {
      * @returns {Promise<object>} a map from blockName -> document | list of documents 
      */
     async fetchRecords() {
+        console.log('[fetcher] this?', this);
         // sanity returns a flat list of documents
         // the _type field is equivilent to the name of the field in interneto block
         const sanityDocs = await this.sanity.fetch(this.query, this.params);
+        console.log('[fetcher] sanity docs:', sanityDocs);
 
         const records = {};
-        for (const doc of sanityDocs) {
-            if (this.blocks[doc._type].type == BlockType.COLLECTION) {
-                records[doc._type] = records[doc._type] || [];
-                records[doc._type].push(await this._prepareDoc(doc));
-                Object.assign(records, await this._prepareDirectChildren(doc));
+        for (const sanityDoc of sanityDocs) {
+            this.blocks[sanityDoc._type];
+            if (this.blocks[sanityDoc._type].type == BlockTypeCollection) {
+                records[sanityDoc._type] = records[sanityDoc._type] || [];
+                records[sanityDoc._type].push(await this._prepareDoc(sanityDoc));
+                Object.assign(records, await this._prepareDirectChildren(sanityDoc));
                 continue;
             }
 
-            records[doc._type] = await this._prepareDoc(doc);
-            Object.assign(records, await this._prepareDirectChildren(doc));
+            records[sanityDoc._type] = await this._prepareDoc(sanityDoc);
+            Object.assign(records, await this._prepareDirectChildren(sanityDoc));
         }
 
         return records;
@@ -75,7 +80,7 @@ export default class SanityFetcher {
 
     async _prepareDirectChildren(doc) {
         const block = this.blocks[doc._type];
-        if (block === undefined) { return {}; }
+        if (block === undefined) {return {};}
         return await this._prepareDirectChildrenWithBlock(doc, block);
     }
 
@@ -90,9 +95,9 @@ export default class SanityFetcher {
                 continue
             }
 
-            if (childBlock.type === BlockType.COLLECTION) {
+            if (childBlock.type === BlockTypeCollection) {
                 let childDocs = doc[childBlock.id];
-                internalRecords[childBlock.id] = await Promise.all(childDocs.map(doc => { 
+                internalRecords[childBlock.id] = await Promise.all(childDocs.map(doc => {
                     if (doc.directChildren !== undefined && doc.directChildren.length !== 0) {
                         throw new Error("Unimlemented, direct children of child array");
                     }
@@ -166,7 +171,7 @@ export default class SanityFetcher {
             }
         }
 
-        if (block.type == BlockType.COLLECTION && doc.slug) {
+        if (block.type == BlockTypeCollection && doc.slug) {
             doc._permalink = `/${doc._type}/${doc.slug.current}`;
         }
 
@@ -192,7 +197,7 @@ export default class SanityFetcher {
         const h = blocksToHtml.h;
 
         const rows = props.node.rows;
-        if (rows.length < 1) { return ''; }
+        if (rows.length < 1) {return '';}
 
         return h('table',
             h('tr', rows[0].cells.map(cell => h('th', cell))),
@@ -255,3 +260,14 @@ function htmlToHyperscript(html) {
     const out = parse5ToHyperscript(documentHtml);
     return out;
 }
+
+
+// return mapping block.id -> block
+const getBlocksMap = (originalBlocks) => {
+    const blocks = {};
+    for (const block of originalBlocks) {
+        blocks[block.id] = block;
+    }
+    return blocks;
+};
+

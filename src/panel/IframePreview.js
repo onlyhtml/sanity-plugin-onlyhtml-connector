@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import styles from './IframePreview.css'
 import SanityFetcher from '../fetcher';
 import sanityClient from 'part:@sanity/base/client'
@@ -9,16 +9,22 @@ export const WebPreview = ({document: doc}) => {
     const {slug, _type} = displayed;
 
     let url = 'http://localhost:8080';
-    if (slug.current) {
-        url += `/${_type}/${slug.current}`;
+    // TODO change this url behaivour
+    // https://docs.netlify.com/routing/redirects/
+    if (slug && slug.current) {
+        url += `/_${_type}`;
     }
 
     const iframeRef = useRef(undefined);
     const [records, setRecords] = useState([]);
 
-    useEffect(async () => {
+    useEffect(() => {
         const fetcher = new SanityFetcher(sanityClient, pluginConfig.blocks);
-        setRecords(await fetcher.fetchRecords());
+        (async () => {
+            const r = await fetcher.fetchRecords();
+            console.log('fetcher got records', r);
+            setRecords(r);
+        })();
     }, [url]);
 
     const onIframeLoad = () => {
@@ -27,7 +33,7 @@ export const WebPreview = ({document: doc}) => {
     };
 
     useEffect(() => {
-        console.log('records changed!');
+        console.log('records changed!', records.length);
         if (iframeRef) {
             renderRecords(iframeRef.current, records);
         }
@@ -36,13 +42,18 @@ export const WebPreview = ({document: doc}) => {
     return (
         <div className={styles.componentWrapper}>
             <div className={styles.iframeContainer}>
-                <iframe src={url} frameBorder={'0'} ref={iframeRef}  onLoad={onIframeLoad}/>
+                <iframe src={url} frameBorder={'0'} ref={iframeRef} onLoad={onIframeLoad} />
             </div>
         </div>
     );
 }
 
 function renderRecords(iframe, records) {
-        iframe.contentWindow.postMessage(records, '*');
+    if (!iframe || !records) {
+        console.warn('was asked to render undefined iframe or records');
+        return;
+    }
+
+    iframe.contentWindow.postMessage(records, '*');
 }
 
