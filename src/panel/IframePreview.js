@@ -24,7 +24,7 @@ export const WebPreview = ({document: doc}) => {
         return new SanityFetcher(
             sanityClient.withConfig({
                 apiVersion: '2021-02-02',
-                useCdn: false,
+                useCdn: true,
                 withCredentials: true,
             }),
             pluginConfig.blocks
@@ -44,6 +44,12 @@ export const WebPreview = ({document: doc}) => {
         });
     }, [fetcher]);
 
+    useEffect(() => {
+        if (!draft) {
+            fetcher.fetchRecords().then(r => setRecords(r))
+        }
+    }, [draft]);
+
     const onIframeLoad = () => {
         console.log('iframe has loaded');
         renderRecords(iframeRef.current, records);
@@ -56,13 +62,15 @@ export const WebPreview = ({document: doc}) => {
         }
 
         (async () => {
-            const clonedDraft = Object.assign({}, draft)
-            const enrichedDoc = await fetcher._prepareDoc(clonedDraft)
+            if (draft) {
+                const clonedDraft = Object.assign({}, draft || {})
+                const enrichedDoc = await fetcher._prepareDoc(clonedDraft)
+                records[_type] = enrichedDoc;
+            }
             // const enrichedDoc = draft;
-            records[_type] = enrichedDoc;
             renderRecords(iframeRef.current, records);
         })();
-    }, [records, draft._rev]);
+    }, [records, draft?._rev]);
 
 
     return (
