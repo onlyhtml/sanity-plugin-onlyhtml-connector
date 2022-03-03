@@ -8,7 +8,12 @@ export const WebPreview = ({document: doc}) => {
     const {displayed, draft} = doc;
     const {slug, _type} = displayed;
 
-    let url = 'http://localhost:8080';
+    let url = pluginConfig.previewHost;
+    if (!url) {
+        return (<div>
+            Invalid preivew host in config.
+        </div>);
+    }
     // TODO change this url behaivour
     // https://docs.netlify.com/routing/redirects/
     if (slug && slug.current) {
